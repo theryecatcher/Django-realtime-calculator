@@ -1,0 +1,79 @@
+{% load bootstrap4 %}
+{% load static from staticfiles %}
+
+<!DOCTYPE html>
+<html>
+    <head lang="en">
+        <meta charset="UTF-8">
+        <title></title>
+        <link href="{% static 'bootstrap.min.css' %}" rel="stylesheet">
+    </head>
+    <body>
+        <div class="container">
+
+            <div class="row col-sm-5">
+                <h1>Calculator Webapp</h1>
+
+                <form method="POST" action="." role="form">
+                    {% csrf_token %}
+                    {% if form.errors %}
+                        <strong>Invalid expression. Please enter valid expression</strong>
+                    {% endif %}
+                    <br/>
+
+                    {% bootstrap_form form %}
+
+                    {% buttons %}
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-primary">
+                            Calculate
+                        </button>
+                    </div>
+                {% endbuttons %}
+
+                </form>
+
+                <ul id="notifications">
+                    {% for calculation in calculations %}
+                        <li>{{ calculation.expression }} = {{ calculation.result }}</li>
+                    {% endfor %}
+                </ul>
+
+            </div>
+
+            <script>
+                var notificationsList = document.getElementById('notifications')
+            
+                var calcSocket = new WebSocket(
+                    'ws://' + window.location.host +
+                    '/ws/calculator/');
+            
+                calcSocket.onmessage = function(e) {
+                    var data = JSON.parse(e.data);
+                    var message = data['message'];
+                    console.log(message)
+                    addNotification(message);
+                };
+            
+                calcSocket.onclose = function(e) {
+                    console.error('Chat socket closed unexpectedly');
+                };
+
+                // Add new notifications
+                function addNotification(notification) {
+                    // Add the new notification
+                    var li = document.createElement("li");
+                    li.innerHTML = notification;
+                    // notificationsList.insertBefore(li, notificationsList.firstChild).hide().show('slow');
+                    notificationsList.insertBefore(li, notificationsList.firstChild);
+
+                    // Remove excess notifications
+                    while (notificationsList.getElementsByTagName("li").length > 10) {
+                        notificationsList.getElementsByTagName("li")[10].remove();
+                    }
+                }
+            </script>
+
+        </div>
+    </body>
+</html>
