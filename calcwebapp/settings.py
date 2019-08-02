@@ -42,6 +42,8 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'calcwebapp.urls'
 
+redis_host = os.environ.get('REDIS_HOST', 'localhost')
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -65,7 +67,7 @@ CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            "hosts": [('127.0.0.1', 6379)],
+            "hosts": [(redis_host, 6379)],
         },
     },
 }
